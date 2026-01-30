@@ -7,7 +7,7 @@ from src.serving.inference import predict  # doit exister dans inference.py
 app = FastAPI(
     title="Telco Customer Churn Prediction API",
     description="ML API for predicting customer churn in telecom industry",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 @app.get("/")
@@ -41,9 +41,9 @@ class CustomerData(BaseModel):
 @app.post("/predict")
 def get_prediction(data: CustomerData):
     try:
-        payload = data.model_dump()  # ✅ Pydantic v2
-        result = predict(payload)    # result devrait déjà être un dict
-        return result                # ✅ renvoyer direct
+        payload = data.model_dump()      # Pydantic v2 ✅
+        result = predict(payload)        # predict() retourne un dict
+        return result
     except Exception as e:
         return {"error": str(e)}
 
@@ -74,7 +74,8 @@ def gradio_interface(
             "MonthlyCharges": float(MonthlyCharges),
             "TotalCharges": float(TotalCharges),
         }
-        return predict(data.dict())
+
+        return predict(payload)   # ✅ c’est ça qu’il faut
 
     except Exception as e:
         return {"error": str(e)}
@@ -101,13 +102,14 @@ gradio_app = gr.Interface(
         gr.Dropdown(["Yes", "No"], label="PaperlessBilling"),
         gr.Dropdown(
             ["Electronic check", "Mailed check", "Bank transfer (automatic)", "Credit card (automatic)"],
-            label="PaymentMethod"
+            label="PaymentMethod",
         ),
+
         gr.Number(label="tenure", value=9),
         gr.Number(label="MonthlyCharges", value=70.0),
         gr.Number(label="TotalCharges", value=70.0),
     ],
-    outputs=gr.JSON(label="prediction"),  # ✅ JSON plus utile qu’un Textbox
+    outputs=gr.JSON(label="prediction"),
     title="Telco Customer Churn - Gradio Demo",
 )
 
