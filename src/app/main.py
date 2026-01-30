@@ -74,8 +74,8 @@ def gradio_interface(
             "MonthlyCharges": float(MonthlyCharges),
             "TotalCharges": float(TotalCharges),
         }
-        result = predict(payload)
-        return result
+        return predict(data.dict())
+
     except Exception as e:
         return {"error": str(e)}
 
