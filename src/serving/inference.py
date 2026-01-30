@@ -4,7 +4,6 @@ from __future__ import annotations
 from pathlib import Path
 import json
 import pandas as pd
-import numpy as np
 import mlflow
 import mlflow.lightgbm
 
@@ -64,11 +63,20 @@ def _final_cast(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     # MLflow + LightGBM : safest => float
     df = df.fillna(0)
+
+    # ✅ Dernière sécurité: pas de dtype object en entrée du modèle
+    obj_cols = df.select_dtypes(include=["object"]).columns.tolist()
+    if obj_cols:
+        # En théorie, ça ne doit jamais arriver si build_features(serving=True) a bien fait le job,
+        # mais on sécurise pour éviter l'erreur UI.
+        df = pd.get_dummies(df, columns=obj_cols, drop_first=True)
+
     for c in df.columns:
         if pd.api.types.is_bool_dtype(df[c]):
             df[c] = df[c].astype(int)
         if pd.api.types.is_numeric_dtype(df[c]):
             df[c] = df[c].astype(float)
+
     return df
 
 
@@ -97,19 +105,23 @@ def predict(payload: dict) -> dict:
     from src.features.build_features import build_features
 
     df = preprocess_data(df, target_col="Churn")
-    df = build_features(df, target_col="Churn")
 
-    # 4) alignement colonnes
+    # ✅ FIX PRINCIPAL : en serving on FORCE les colonnes fixes (sinon 1 ligne => nunique=1 => pas d'encodage)
+    df = build_features(df, target_col="Churn", serving=True)
+
+    # 4) alignement colonnes (one-hot stable)
+    # add missing cols
     for col in _feature_cols:
         if col not in df.columns:
             df[col] = 0
+
+    # drop extra cols (si jamais)
     df = df[_feature_cols]
 
     # 5) cast final
     df = _final_cast(df)
 
     # 6) proba churn
-    # ✅ Ici on est sûr d'avoir predict_proba()
     proba = float(_model.predict_proba(df)[:, 1][0])
     pred = int(proba >= float(_threshold))
 

@@ -1,0 +1,49 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# ---- Virtual env ----
+.venv/
+venv/
+ENV/
+env/
+
+# ---- Jupyter / local experiments ----
+.ipynb_checkpoints/
+ADA.ipynb
+
+# ---- MLflow local tracking (pas utile dans l'image) ----
+mlruns/
+mlartifacts/
+mlflow.db
+
+# ---- Data (ne pas embarquer le dataset brut) ----
+data/raw/
+data/**/*.csv
+data/**/*.parquet
+data/**/*.xlsx
+
+# ---- Logs ----
+*.log
+
+# ---- OS / IDE ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ---- Git ----
+.git/
+.gitattributes
+.gitignore
+
+# ---- Docker build leftovers ----
+*.tar

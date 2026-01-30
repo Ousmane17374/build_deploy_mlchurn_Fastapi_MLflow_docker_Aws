@@ -72,4 +72,9 @@ def build_features(df: pd.DataFrame, target_col: str = "Churn", serving: bool = 
     if bool_cols:
         df[bool_cols] = df[bool_cols].astype(int)
 
+    # ✅ SAFETY GUARD: si des object restent (ne devrait pas arriver en serving=True), on one-hot
+    leftover_obj = [c for c in df.select_dtypes(include=["object"]).columns if c != target_col]
+    if leftover_obj:
+        df = pd.get_dummies(df, columns=leftover_obj, drop_first=True)
+
     return df
