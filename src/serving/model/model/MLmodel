@@ -1,0 +1,22 @@
+artifact_path: file:D:/Applications/Build & Deploy ML churn model with FastAPI, MLFlow,
+  Docker, & AWS/mlruns/1/models/m-fa1d519d8d6c4c3cbefe5323c099bc0c/artifacts
+flavors:
+  lightgbm:
+    code: null
+    data: model.pkl
+    lgb_version: 4.6.0
+    model_class: lightgbm.sklearn.LGBMClassifier
+  python_function:
+    data: model.pkl
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.lightgbm
+    python_version: 3.12.10
+mlflow_version: 3.8.1
+model_id: m-fa1d519d8d6c4c3cbefe5323c099bc0c
+model_size_bytes: 81175
+model_uuid: m-fa1d519d8d6c4c3cbefe5323c099bc0c
+prompts: null
+run_id: f8c180c1b8fc49aeb087dc71004f34a9
+utc_time_created: '2026-01-29 22:41:52.731395'
