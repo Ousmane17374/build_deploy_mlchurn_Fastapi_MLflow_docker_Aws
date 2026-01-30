@@ -53,7 +53,8 @@ def predict(payload: dict) -> dict:
 
     # 2) preprocess + features (API n'a pas Churn => on passe target_col mais sans colonne)
     df = preprocess_data(df, target_col="Churn")
-    df = build_features(df, target_col="Churn")  # doit tolérer l'absence de Churn (corrigé)
+    df = build_features(df, target_col="Churn", serving=True)
+  # doit tolérer l'absence de Churn (corrigé)
 
     # 3) aligner colonnes au training
     for c in _feature_cols:
