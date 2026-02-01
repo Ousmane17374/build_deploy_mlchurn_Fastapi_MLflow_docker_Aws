@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 import gradio as gr
 
 from src.serving.inference import predict  # doit exister dans inference.py
@@ -10,11 +10,39 @@ app = FastAPI(
     version="1.0.0",
 )
 
+
 @app.get("/")
 def root():
     return {"status": "ok"}
 
+
 class CustomerData(BaseModel):
+    # ✅ Pydantic v2: exemple Swagger (pré-rempli dans /docs -> Try it out)
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "gender": "Male",
+                "Partner": "Yes",
+                "Dependents": "No",
+                "PhoneService": "Yes",
+                "MultipleLines": "No",
+                "InternetService": "Fiber optic",
+                "OnlineSecurity": "No",
+                "OnlineBackup": "Yes",
+                "DeviceProtection": "No",
+                "TechSupport": "No",
+                "StreamingTV": "Yes",
+                "StreamingMovies": "Yes",
+                "Contract": "Month-to-month",
+                "PaperlessBilling": "Yes",
+                "PaymentMethod": "Electronic check",
+                "tenure": 12,
+                "MonthlyCharges": 85.5,
+                "TotalCharges": 1025.6,
+            }
+        }
+    )
+
     gender: str
     Partner: str
     Dependents: str
@@ -38,14 +66,16 @@ class CustomerData(BaseModel):
     MonthlyCharges: float
     TotalCharges: float
 
+
 @app.post("/predict")
 def get_prediction(data: CustomerData):
     try:
-        payload = data.model_dump()      # Pydantic v2 ✅
-        result = predict(payload)        # predict() retourne un dict
+        payload = data.model_dump()  # Pydantic v2 ✅
+        result = predict(payload)    # predict() retourne un dict
         return result
     except Exception as e:
         return {"error": str(e)}
+
 
 def gradio_interface(
     gender, Partner, Dependents, PhoneService, MultipleLines,
@@ -75,10 +105,11 @@ def gradio_interface(
             "TotalCharges": float(TotalCharges),
         }
 
-        return predict(payload)   # ✅ c’est ça qu’il faut
+        return predict(payload)
 
     except Exception as e:
         return {"error": str(e)}
+
 
 gradio_app = gr.Interface(
     fn=gradio_interface,
@@ -105,9 +136,9 @@ gradio_app = gr.Interface(
             label="PaymentMethod",
         ),
 
-        gr.Number(label="tenure", value=9),
-        gr.Number(label="MonthlyCharges", value=70.0),
-        gr.Number(label="TotalCharges", value=70.0),
+        gr.Number(label="tenure", value=12),
+        gr.Number(label="MonthlyCharges", value=85.5),
+        gr.Number(label="TotalCharges", value=1025.6),
     ],
     outputs=gr.JSON(label="prediction"),
     title="Telco Customer Churn - Gradio Demo",
