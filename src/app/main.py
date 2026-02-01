@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Body
 from pydantic import BaseModel, ConfigDict
 import gradio as gr
 
@@ -10,37 +10,38 @@ app = FastAPI(
     version="1.0.0",
 )
 
-
 @app.get("/")
 def root():
     return {"status": "ok"}
 
 
+# ✅ Exemple unique pour Swagger / Try it out
+EXAMPLE_PAYLOAD = {
+    "gender": "Male",
+    "Partner": "Yes",
+    "Dependents": "No",
+    "PhoneService": "Yes",
+    "MultipleLines": "No",
+    "InternetService": "Fiber optic",
+    "OnlineSecurity": "No",
+    "OnlineBackup": "Yes",
+    "DeviceProtection": "No",
+    "TechSupport": "No",
+    "StreamingTV": "Yes",
+    "StreamingMovies": "Yes",
+    "Contract": "Month-to-month",
+    "PaperlessBilling": "Yes",
+    "PaymentMethod": "Electronic check",
+    "tenure": 12,
+    "MonthlyCharges": 85.5,
+    "TotalCharges": 1025.6,
+}
+
+
 class CustomerData(BaseModel):
-    # ✅ Pydantic v2: exemple Swagger (pré-rempli dans /docs -> Try it out)
+    # ✅ Pydantic v2 (optionnel mais utile)
     model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "gender": "Male",
-                "Partner": "Yes",
-                "Dependents": "No",
-                "PhoneService": "Yes",
-                "MultipleLines": "No",
-                "InternetService": "Fiber optic",
-                "OnlineSecurity": "No",
-                "OnlineBackup": "Yes",
-                "DeviceProtection": "No",
-                "TechSupport": "No",
-                "StreamingTV": "Yes",
-                "StreamingMovies": "Yes",
-                "Contract": "Month-to-month",
-                "PaperlessBilling": "Yes",
-                "PaymentMethod": "Electronic check",
-                "tenure": 12,
-                "MonthlyCharges": 85.5,
-                "TotalCharges": 1025.6,
-            }
-        }
+        json_schema_extra={"example": EXAMPLE_PAYLOAD}
     )
 
     gender: str
@@ -68,10 +69,21 @@ class CustomerData(BaseModel):
 
 
 @app.post("/predict")
-def get_prediction(data: CustomerData):
+def get_prediction(
+    data: CustomerData = Body(
+        ...,
+        examples={
+            "default": {
+                "summary": "Default example",
+                "description": "Change only the values, keep the keys.",
+                "value": EXAMPLE_PAYLOAD,
+            }
+        },
+    )
+):
     try:
-        payload = data.model_dump()  # Pydantic v2 ✅
-        result = predict(payload)    # predict() retourne un dict
+        payload = data.model_dump()      # Pydantic v2 ✅
+        result = predict(payload)        # predict() retourne un dict
         return result
     except Exception as e:
         return {"error": str(e)}
