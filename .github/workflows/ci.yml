@@ -41,4 +41,4 @@ jobs:
           file: ./dockerfile
           push: true
           tags: |
-            432839260299.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/telco-fastapi:latest
+            432839260299.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
